@@ -1,6 +1,7 @@
 # Pullback-Device
 This is an overview of a low-cost open source pullback device for varicose vein surgery.
-![Alt text](image.png)
+![image](https://github.com/syauqibilfaqih/Pullback-Device/assets/70939903/c3945d6e-a811-46b0-b138-a8d5c8ff6108)
+
 
 ## Usage
 Look at the video attached bellow:
