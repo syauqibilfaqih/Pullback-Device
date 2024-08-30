@@ -7,10 +7,16 @@
 #include <U8x8lib.h>
 #include <U8g2lib.h>
 #include <analogWrite.h>
+#include <ESP32RotaryEncoder.h>
 
 #ifdef U8X8_HAVE_HW_SPI
 #include <SPI.h>
 #endif
+
+// Encoder pins
+const uint8_t DI_ENCODER_A   = 2;
+const uint8_t DI_ENCODER_B   = 4;
+long counter = 0;
 
 // WiFi SSID & Password
 const char* ssid = "VICTUS 0978";
@@ -18,6 +24,8 @@ const char* password = "5Vr7434/";
 
 U8X8_SH1106_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
+RotaryEncoder rotaryEncoder( DI_ENCODER_A, DI_ENCODER_B);
+
 
 const unsigned char myBitmap [] PROGMEM = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -94,6 +102,12 @@ const unsigned char myBitmapRev [] PROGMEM = {
   0x76, 0x14, 0x55, 0x95, 0xAA, 0x6A, 0xA0, 0x05, 0x56, 0xD5, 0x55, 0x95, 
   0xEA, 0x5E, 0xBB, 0x0A, 0x00, 0x12, 0x13, 0x80, 0x28, 0x02, 0x14, 0x00
 };
+
+void knobCallback( long value )
+{
+  counter = counter+value;
+  Serial.printf( "Value: %ld\n", counter );
+}
 
  #define encUA 2
  #define encUB 4
@@ -319,6 +333,22 @@ void setup(void)
   u8x8.drawString(0,2," >Speed  : ");
   u8x8.drawString(0,3,"  Length : ");
   u8x8.drawString(0,4,"  Run!");
+  // This tells the library that the encoder has its own pull-up resistors
+	rotaryEncoder.setEncoderType( EncoderType::HAS_PULLUP );
+
+	// Range of values to be returned by the encoder: minimum is 1, maximum is 10
+	// The third argument specifies whether turning past the minimum/maximum will
+	// wrap around to the other side:
+	//  - true  = turn past 10, wrap to 1; turn past 1, wrap to 10
+	//  - false = turn past 10, stay on 10; turn past 1, stay on 1
+	// rotaryEncoder.setBoundaries( 1, 1000, true );
+
+	// The function specified here will be called every time the knob is turned
+	// and the current value will be passed to it
+	rotaryEncoder.onTurned( &knobCallback );
+
+	// This is where the inputs are configured and the interrupts get attached
+	rotaryEncoder.begin();
 }
 
 void loop(void)
